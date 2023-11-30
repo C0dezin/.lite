@@ -9,14 +9,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-    "type": "module",
-    "dependencies": {
-      "express": "^4.17.1",
-      "multer": "^1.4.2",
-      "archiver": "^5.3.0",
-      "unzipper": "^0.11.0",
-      "file-type": "^17.0.0"
-    }
-
-  
+  "type": "module",
+  "dependencies": {
+    "archiver": "^5.3.0",
+    "child_process": "^1.0.2",
+    "express": "^4.17.1",
+    "file-type": "^17.0.0",
+    "msgpack-lite": "^0.1.26",
+    "multer": "^1.4.2",
+    "unzipper": "^0.10.14",
+    "util.promisify": "^1.1.2"
+  }
 }

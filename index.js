@@ -50,9 +50,16 @@ app.post('/encrypt', upload.single('arquivo'), (req, res) => {
 
 // Rota para lidar com o download e descompactação do arquivo .b3d (decrypt)
 app.post('/decrypt', upload.single('arquivoB3D'), async (req, res) => {
-  const inputPath = req.file.path;
-  const originalFileName = req.file.originalname.replace('.b3d', '');
-  const outputPath = path.join(__dirname, '/descompactados/', originalFileName);
+  let inputPath
+  let outputPath
+  let originalFileName
+  try {
+  inputPath = req.file.path;
+  originalFileName = req.file.originalname.replace('.b3d', '');
+  outputPath = path.join(__dirname, '/descompactados/', originalFileName);
+  } catch (error) {
+    res.send("Send your file again please ^^")
+  }
 
   try {
     await descompactarArquivo(inputPath, outputPath);
@@ -79,12 +86,17 @@ res.download(updatedOriginalFilePath, originalFileNameWithExt, async (err) => {
     await fs.promises.unlink(inputPath);
     await fs.promises.unlink(metadataFilePath);
     await fs.promises.unlink(updatedOriginalFilePath);
+    await fs.rmSync(outputPath, { recursive: true, force: true });
   }
 });
 
   } catch (error) {
     console.error('Error during decryption:', error);
+    try {
     res.status(500).send('Error during decryption');
+    } catch(error) {
+      console.log(error)
+    }
   }
 });
 
@@ -92,9 +104,9 @@ res.download(updatedOriginalFilePath, originalFileNameWithExt, async (err) => {
 
 async function recuperarConteudoOriginal(metadataFilePath, originalFilePath) {
   try {
-    const metadata = await fs.promises.readFile(metadataFilePath, 'utf8');
-    const parsedMetadata = JSON.parse(metadata);
-    const originalFileContent = Buffer.from(parsedMetadata.hexData, 'hex');
+    const metadataBuffer = await fs.promises.readFile(metadataFilePath);
+const parsedMetadata = JSON.parse(metadataBuffer.toString('utf8'));
+const originalFileContent = Buffer.from(parsedMetadata.base64Data, 'base64');
     await fs.promises.writeFile(originalFilePath, originalFileContent);
     const detectedExt = detectarExtensao(originalFileContent);
     return detectedExt;
@@ -107,8 +119,7 @@ async function recuperarConteudoOriginal(metadataFilePath, originalFilePath) {
 
 
 
-
-function compactarArquivo(inputPath, outputPath, originalFileName, fileExtension, callback) {
+async function compactarArquivo(inputPath, outputPath, originalFileName, fileExtension, callback) {
   const output = fs.createWriteStream(outputPath);
   const archive = archiver('zip');
 
@@ -119,22 +130,24 @@ function compactarArquivo(inputPath, outputPath, originalFileName, fileExtension
 
   archive.pipe(output);
 
-  const originalFileContent = fs.readFileSync(inputPath);
-
-  // Include original filename and file extension in metadata
+  // Include only the metadata in the archive
   const metadata = {
-    hexData: originalFileContent.toString('hex'),
+    base64Data: fs.readFileSync(inputPath).toString('base64'),
     originalFileName: originalFileName,
     fileExtension: fileExtension
   };
 
-  archive.append(Buffer.from(JSON.stringify(metadata)), { name: 'metadata.bin' }); // Save as binary
-  archive.append(originalFileContent, { name: originalFileName + fileExtension });
+  // Save metadata as binary
+  archive.append(Buffer.from(JSON.stringify(metadata)), { name: 'metadata.bin' });
 
   output.path = outputPath;
 
   archive.finalize();
 }
+
+
+
+
 
 
 async function detectarExtensao(buffer) {
@@ -152,7 +165,6 @@ async function detectarExtensao(buffer) {
 
 async function descompactarArquivo(inputPath, outputPath) {
   const metadataPath = path.join(outputPath, 'metadata.bin');
-  const originalFilePath = path.join(outputPath, 'original');
 
   const unzipStream = unzipper.Parse();
 
@@ -169,7 +181,8 @@ async function descompactarArquivo(inputPath, outputPath) {
               .on('error', reject);
           });
         } else {
-          return entry.autodrain(); // If not metadata, just drain the entry
+          // Drain the entry if it's not the metadata file
+          entry.autodrain();
         }
       });
   });
@@ -181,31 +194,22 @@ async function descompactarArquivo(inputPath, outputPath) {
     // Start streaming from the input file
     fs.createReadStream(inputPath).pipe(unzipStream);
   })
-  .then((metadataPath) => {
+  .then(async (metadataPath) => {
     // Introduce a slight delay to ensure the directory creation is completed
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(metadataPath), 1000); // Adjust the delay as needed
-    });
-  })
-  .then((metadataPath) => {
-    // Read the metadata file and handle its content
-    return fs.promises.readFile(metadataPath)
-      .then((data) => {
-        const metadata = JSON.parse(data.toString()); // Parse as JSON
-        const detectedExt = metadata.extension || '.txt';
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // Rename the original file with the correct extension
-        return fs.promises.rename(originalFilePath, originalFilePath + detectedExt)
-          .then(() => {
-            // Optionally, you can remove the metadata file after processing
-            return fs.promises.unlink(metadataPath);
-          });
-      });
+    // Return the path to the metadata file
+    return metadataPath;
   })
   .catch((err) => {
-    console.error('Error during decryption:', err);
+    console.error('Error during decompression:', err);
+    throw err;
   });
 }
+
+
+
+
 
 
 
