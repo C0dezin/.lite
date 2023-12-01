@@ -8,22 +8,22 @@ import path from 'node:path';
 export const compactFile = (inputPath, outputPath, originalFileName, fileExtension, callback) => {
   const output = fs.createWriteStream(outputPath);
   const archive = archiver('zip', {
-      zlib: { level: 9 } // Sets the compression level.
+    zlib: { level: 9 } // Sets the compression level.
   });
 
   output.on('close', function () {
-      console.log('Arquivo compactado com sucesso:', outputPath);
-      callback();
+    console.log('Arquivo compactado com sucesso:', outputPath);
+    callback();
   });
 
   archive.pipe(output);
 
-  // Include only the metadata in the archive
+  // Include only essential metadata in the archive
   const metadata = {
-      // Compress the base64Data using zlib
-      base64Data: zlib.deflateSync(fs.readFileSync(inputPath).toString('base64')).toString('base64'),
-      originalFileName: originalFileName,
-      fileExtension: fileExtension
+    // Compress the base64Data using zlib
+    base64Data: zlib.deflateSync(fs.readFileSync(inputPath).toString('base64')).toString('base64'),
+    originalFileName: originalFileName,
+    fileExtension: fileExtension
   };
 
   // Save metadata as binary
