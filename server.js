@@ -24,6 +24,6 @@ app.get('/decrypt', (req, res) => {
 
 app.post('/encrypt', upload.single('arquivo'), encryptRoute);
 
-app.post('/decrypt', upload.single('arquivoB3D'), decryptRoute);
+app.post('/decrypt', upload.single('arquivoLITE'), decryptRoute);
 
 export default app;

@@ -10,11 +10,11 @@ export const encryptRoute = (req, res) => {
   const inputPath = req.file.path;
   const originalFileName = req.file.originalname;
   const fileExtension = path.extname(originalFileName);
-  const outputPath = path.join(__dirname, '/compactados/', originalFileName + '.b3d');
+  const outputPath = path.join(__dirname, '/compactados/', originalFileName + '.lite');
 
   compactFile(inputPath, outputPath, originalFileName, fileExtension, () => {
-    const b3dFileName = originalFileName + '.b3d';
-    res.download(outputPath, b3dFileName, (err) => {
+    const liteFileName = originalFileName + '.lite';
+    res.download(outputPath, liteFileName, (err) => {
       if (err) {
         console.error('Error sending file:', err);
         res.status(500).send('Error sending file');

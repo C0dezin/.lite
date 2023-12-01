@@ -13,7 +13,7 @@ export const decryptRoute = async (req, res) => {
   let originalFileName;
   try {
     inputPath = req.file.path;
-    originalFileName = req.file.originalname.replace('.b3d', '');
+    originalFileName = req.file.originalname.replace('.lite', '');
     outputPath = path.join(__dirname, '/descompactados/', originalFileName);
   } catch (error) {
     res.send('Send your file again, please ^^');
