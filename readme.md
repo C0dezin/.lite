@@ -1,4 +1,4 @@
-[![HitCount](https://hits.dwyl.com/c0dezin/FTT.svg?style=flat-square)](http://hits.dwyl.com/c0dezin/FTT)
+[![HitCount](https://hits.dwyl.com/c0dezin/.lite.svg?style=flat-square&show=unique)](https://github.com/C0dezin/.lite/)
 [![wakatime](https://wakatime.com/badge/user/018c2181-6355-4e47-8053-f7e42d337f6f/project/018c21b6-d90e-4d35-b59a-69aa197978fb.svg)](https://wakatime.com/badge/user/018c2181-6355-4e47-8053-f7e42d337f6f/project/018c21b6-d90e-4d35-b59a-69aa197978fb)
 
 
