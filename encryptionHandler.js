@@ -10,7 +10,7 @@ export const encryptRoute = (req, res) => {
   const inputPath = req.file.path;
   const originalFileName = req.file.originalname;
   const fileExtension = path.extname(originalFileName);
-  const outputPath = path.join(__dirname, '/compactados/', originalFileName + '.lite');
+  const outputPath = path.join(__dirname, '/compressed/', originalFileName + '.lite');
 
   compactFile(inputPath, outputPath, originalFileName, fileExtension, () => {
     const liteFileName = originalFileName + '.lite';

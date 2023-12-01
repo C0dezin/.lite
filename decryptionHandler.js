@@ -14,7 +14,7 @@ export const decryptRoute = async (req, res) => {
   try {
     inputPath = req.file.path;
     originalFileName = req.file.originalname.replace('.lite', '');
-    outputPath = path.join(__dirname, '/descompactados/', originalFileName);
+    outputPath = path.join(__dirname, '/uncompressed/', originalFileName);
   } catch (error) {
     res.send('Send your file again, please ^^');
   }
